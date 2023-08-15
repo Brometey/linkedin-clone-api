@@ -10,11 +10,15 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { FeedService } from '../controllers/feed.service';
+import { FeedService } from '../services/feed.service';
 import { FeedPost } from '../models/post.interface';
 import { Observable } from 'rxjs';
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { Role } from 'src/auth/models/role.enum';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { IsCreatorGuard } from '../guards/is-creator.guard';
 
 @Controller('feed')
 export class FeedController {
@@ -29,12 +33,14 @@ export class FeedController {
     return this.feedService.findPosts(take, skip);
   }
 
-  @UseGuards(JwtGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   @Post()
   async create(@Body() post: FeedPost, @Request() req) {
     return this.feedService.createPost(req.user, post);
   }
 
+  @UseGuards(JwtGuard, IsCreatorGuard)
   @Put(':id')
   update(
     @Body() feedPost: FeedPost,
@@ -43,6 +49,7 @@ export class FeedController {
     return this.feedService.updatePost(id, feedPost);
   }
 
+  @UseGuards(JwtGuard, IsCreatorGuard)
   @Delete(':id')
   delete(@Param('id') id: number): Observable<DeleteResult> {
     return this.feedService.deletePost(id);
