@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { FeedService } from './services/feed.service';
+import { FeedService } from './controllers/feed.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FeedPostEntity } from './models/post.entity';
 import { FeedController } from './controller/feed.controller';

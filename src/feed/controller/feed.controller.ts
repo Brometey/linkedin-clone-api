@@ -7,11 +7,14 @@ import {
   Post,
   Put,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { FeedService } from '../services/feed.service';
+import { FeedService } from '../controllers/feed.service';
 import { FeedPost } from '../models/post.interface';
 import { Observable } from 'rxjs';
 import { DeleteResult, UpdateResult } from 'typeorm';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('feed')
 export class FeedController {
@@ -26,9 +29,10 @@ export class FeedController {
     return this.feedService.findPosts(take, skip);
   }
 
+  @UseGuards(JwtGuard)
   @Post()
-  async create(@Body() post: FeedPost) {
-    return this.feedService.createPost(post);
+  async create(@Body() post: FeedPost, @Request() req) {
+    return this.feedService.createPost(req.user, post);
   }
 
   @Put(':id')
