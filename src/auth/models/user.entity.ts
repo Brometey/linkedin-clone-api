@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Role } from './role.enum';
 import { FeedPostEntity } from 'src/feed/models/post.entity';
 
-@Entity('user_')
+@Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,6 +15,9 @@ export class UserEntity {
 
   @Column({ select: false })
   password: string;
+
+  @Column({ nullable: true })
+  imagePath: string;
 
   @Column({ unique: true })
   email: string;
