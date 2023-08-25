@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Observable, from, map, switchMap } from 'rxjs';
-import { User } from '../models/user.interface';
+import { User } from '../models/user.class';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../models/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';

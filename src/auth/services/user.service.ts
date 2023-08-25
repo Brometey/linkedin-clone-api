@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from '../models/user.entity';
 import { Observable, from, map, of, switchMap } from 'rxjs';
-import { User } from '../models/user.interface';
+import { User } from '../models/user.class';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FriendRequestEntity } from '../models/friend-request.entity';
 import {
@@ -25,6 +25,9 @@ export class UserService {
       this.userRepository.findOne({ where: { id }, relations: ['feedPosts'] }),
     ).pipe(
       map((user: User) => {
+        if (!user) {
+          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
         delete user.password;
         return user;
       }),
