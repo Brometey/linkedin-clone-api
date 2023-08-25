@@ -9,13 +9,14 @@ import {
   CustomHttpExceptionResponse,
   HttpExceptionResponse,
 } from './models/http-exception-response.interface';
+import * as fs from 'fs';
 
 @Catch()
 export class AllExceptonFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse();
+    const request = ctx.getRequest();
     let status: HttpStatus;
     let errorMessage: string;
 
@@ -30,7 +31,13 @@ export class AllExceptonFilter implements ExceptionFilter {
       errorMessage = 'Critical internal server error occured';
     }
     const errorResponse = this.getErrorResponse(status, errorMessage, request);
-    this.logError(errorResponse, request, exception);
+    const errorLog: string = this.getErrorLog(
+      errorResponse,
+      request,
+      exception,
+    );
+    this.writeErrorLogToFile(errorLog);
+    response.status(status).json(errorResponse);
   }
   private getErrorResponse = (
     status: HttpStatus,
@@ -44,11 +51,11 @@ export class AllExceptonFilter implements ExceptionFilter {
     timeStamp: new Date(),
   });
 
-  private logError = (
+  private getErrorLog = (
     errorResponse: CustomHttpExceptionResponse,
     request,
     exception: unknown,
-  ): void => {
+  ): string => {
     const { statusCode, error } = errorResponse;
     const { method, url } = request;
     const errorLog = `Response Code: ${statusCode} - Method: ${method} - URL: ${
@@ -56,5 +63,12 @@ export class AllExceptonFilter implements ExceptionFilter {
     }\n\n ${JSON.stringify(request.user ?? 'Not signed in')}\n\n${
       exception instanceof HttpException ? exception.stack : error
     }\n\n`;
+    return errorLog;
+  };
+
+  private writeErrorLogToFile = (errorLog: string): void => {
+    fs.appendFile('error.log', errorLog, 'utf8', (err) => {
+      if (err) throw err;
+    });
   };
 }

@@ -44,7 +44,6 @@ export class AuthService {
     return from(
       this.userRepository.findOne({
         where: { email },
-        select: ['id', 'firstName', 'lastName', 'email', 'password', 'role'],
       }),
     ).pipe(
       switchMap((user: User) => {
